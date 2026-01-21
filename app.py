@@ -2,26 +2,43 @@ import streamlit as st
 import sys
 import os
 
-# --- حل مشكلة المسارات لبيئة Streamlit Cloud ---
-# الحصول على المسار المطلق للمجلد الحالي الذي يحتوي على app.py
+# --- حل جذري لمشكلة المسارات ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
+modules_dir = os.path.join(current_dir, 'modules')
+
+# إضافة المسارات للنظام
 if current_dir not in sys.path:
     sys.path.append(current_dir)
-# ----------------------------------------------
+if modules_dir not in sys.path:
+    sys.path.append(modules_dir)
 
+# --- استيراد المكتبات الخارجية ---
 import folium
 from streamlit_folium import st_folium
 
-# استيراد الموديولات الخاصة بالمشروع من مجلد modules
-from modules.db import init_db, ensure_settings, get_setting
-from modules.style import apply_custom_style, get_custom_css
-from modules.evaluation import render_evaluation_module
-from modules.admin import render_admin_panel
-from modules.dashboard import render_dashboard
-from modules.report import render_report_module
-from modules.investment_committee import InvestmentCommitteeSystem
-from modules.municipal_lease_types import MunicipalLeaseTypes
-from modules.site_rental_value import SiteRentalValuation
+# --- استيراد موديولات المشروع بطريقة مرنة ---
+try:
+    # المحاولة الأولى: الاستيراد كحزمة (Package)
+    from modules.db import init_db, ensure_settings, get_setting
+    from modules.style import apply_custom_style, get_custom_css
+    from modules.evaluation import render_evaluation_module
+    from modules.admin import render_admin_panel
+    from modules.dashboard import render_dashboard
+    from modules.report import render_report_module
+    from modules.investment_committee import InvestmentCommitteeSystem
+    from modules.municipal_lease_types import MunicipalLeaseTypes
+    from modules.site_rental_value import SiteRentalValuation
+except ModuleNotFoundError:
+    # المحاولة الثانية: الاستيراد المباشر (Direct Import) في حال فشل الأولى
+    from db import init_db, ensure_settings, get_setting
+    from style import apply_custom_style, get_custom_css
+    from evaluation import render_evaluation_module
+    from admin import render_admin_panel
+    from dashboard import render_dashboard
+    from report import render_report_module
+    from investment_committee import InvestmentCommitteeSystem
+    from municipal_lease_types import MunicipalLeaseTypes
+    from site_rental_value import SiteRentalValuation
 
 # تهيئة النظام الأساسي
 apply_custom_style()
@@ -68,7 +85,6 @@ class EnhancedApp:
             u = st.text_input("اسم المستخدم")
             p = st.text_input("كلمة المرور", type="password")
             if st.form_submit_button("دخول"):
-                # يمكنك إضافة نظام تحقق حقيقي هنا
                 st.session_state.authenticated = True
                 st.rerun()
 
@@ -95,7 +111,6 @@ class EnhancedApp:
         st.divider()
         selected_key = self.lease_manager.render_lease_type_selection()
         
-        # جلب المعامل من الإعدادات العامة
         mult_key = self.lease_manager.lease_types[selected_key]['multiplier_key']
         multiplier = float(get_setting(mult_key, 1.0))
         
