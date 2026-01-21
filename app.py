@@ -1,6 +1,18 @@
 import streamlit as st
+import sys
+import os
+
+# --- حل مشكلة المسارات لبيئة Streamlit Cloud ---
+# الحصول على المسار المطلق للمجلد الحالي الذي يحتوي على app.py
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+# ----------------------------------------------
+
 import folium
 from streamlit_folium import st_folium
+
+# استيراد الموديولات الخاصة بالمشروع من مجلد modules
 from modules.db import init_db, ensure_settings, get_setting
 from modules.style import apply_custom_style, get_custom_css
 from modules.evaluation import render_evaluation_module
@@ -42,7 +54,8 @@ class EnhancedApp:
 
     def run(self):
         st.markdown(get_custom_css(), unsafe_allow_html=True)
-        if 'authenticated' not in st.session_state: st.session_state.authenticated = False
+        if 'authenticated' not in st.session_state: 
+            st.session_state.authenticated = False
 
         if not st.session_state.authenticated:
             self.render_login()
@@ -55,6 +68,7 @@ class EnhancedApp:
             u = st.text_input("اسم المستخدم")
             p = st.text_input("كلمة المرور", type="password")
             if st.form_submit_button("دخول"):
+                # يمكنك إضافة نظام تحقق حقيقي هنا
                 st.session_state.authenticated = True
                 st.rerun()
 
@@ -63,11 +77,16 @@ class EnhancedApp:
             st.title("القائمة الرئيسية")
             choice = st.radio("انتقل إلى:", ["📊 لوحة التحكم", "📈 التقييم الإيجاري", "👥 لجنة الاستثمار", "📑 التقارير", "⚙️ الإعدادات"])
         
-        if choice == "📊 لوحة التحكم": render_dashboard('admin')
-        elif choice == "📈 التقييم الإيجاري": self.render_valuation_page()
-        elif choice == "👥 لجنة الاستثمار": self.committee_manager.render_committee_module()
-        elif choice == "📑 التقارير": render_report_module('admin')
-        elif choice == "⚙️ الإعدادات": render_admin_panel('admin')
+        if choice == "📊 لوحة التحكم": 
+            render_dashboard('admin')
+        elif choice == "📈 التقييم الإيجاري": 
+            self.render_valuation_page()
+        elif choice == "👥 لجنة الاستثمار": 
+            self.committee_manager.render_committee_module()
+        elif choice == "📑 التقارير": 
+            render_report_module('admin')
+        elif choice == "⚙️ الإعدادات": 
+            render_admin_panel('admin')
 
     def render_valuation_page(self):
         st.header("📍 تقييم القيمة الإيجارية للموقع")
