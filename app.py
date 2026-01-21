@@ -12,6 +12,20 @@ if current_dir not in sys.path:
 if modules_dir not in sys.path:
     sys.path.append(modules_dir)
 
+# استيراد موديولات المشروع باستخدام المسار الكامل لضمان الوصول
+try:
+    import modules.db as db_mod
+    init_db = db_mod.init_db
+    ensure_settings = db_mod.ensure_settings
+    get_setting = db_mod.get_setting
+    
+    import modules.style as style_mod
+    apply_custom_style = style_mod.apply_custom_style
+    get_custom_css = style_mod.get_custom_css
+    
+    # كرر نفس النمط لبقية الموديولات...
+except Exception as e:
+    st.error(f"خطأ في تحميل الملفات البرمجية: {e}")
 # --- استيراد المكتبات الخارجية ---
 import folium
 from streamlit_folium import st_folium
